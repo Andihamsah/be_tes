@@ -9,14 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id',
-    'toko_id',
-    'img',
-    'namaBarang',
-    'asal',
-    'rating',
-    'harga',
-    'jumlahBarang'];
+    protected $guarded = ['id'];
 
     public function user() {
         return $this->belongsTo(User::class);
@@ -24,5 +17,9 @@ class Product extends Model
 
     public function shop() {
         return $this->belongsTo(Shop::class);
+    }
+
+    public function buy() {
+        return $this->hasMany(Buy::class);
     }
 }

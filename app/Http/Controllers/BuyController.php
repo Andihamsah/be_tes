@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
 use App\Models\buy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BuyController extends Controller
 {
@@ -12,7 +14,9 @@ class BuyController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+        $buy = $user-buy()->get();
+        return ResponseHelper::success($buy, 'success', 200);
     }
 
     /**

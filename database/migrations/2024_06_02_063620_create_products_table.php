@@ -14,17 +14,18 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('toko_id');
-            $table->text('img');
+            $table->unsignedBigInteger('shop_id');
+            $table->text('img')->nullable();
             $table->string('namaBarang');
             $table->string('asal');
             $table->string('rating');
             $table->integer('harga');
             $table->integer('jumlahBarang');
+            $table->integer('barangTerjual')->default(0);
             $table->timestamps();
             
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('toko_id')->references('id')->on('shops')->onDelete('cascade');
+            $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
         });
     }
 

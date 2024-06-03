@@ -53,7 +53,7 @@ class AuthController extends Controller
             $token = $user->createToken('LaravelAuthApp')->accessToken;
             $role = $user->roles()->first();
             $shop = Auth::user()->shop;
-            return ResponseHelper::success(['token' => $token, 'role' => $role->name, 'shop' => $shop->id], 'login berhasil', 200);
+            return ResponseHelper::success(['token' => $token, 'role' => $role->name, 'shop' => $shop], 'login berhasil', 200);
         } else {
             return ResponseHelper::error(['error' => 'Unauthorized'], 401);
         }

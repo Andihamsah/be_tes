@@ -7,12 +7,14 @@ use App\Models\Product;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     public function index() {
         $user = Auth::user();
-        $products = $user->products()->with('shop')->get();
+        $products = Product::->get();
+        // $image =  Storage::disk('public')->get('storage/'.$products[2]->img);
         return ResponseHelper::success($products, 200);
     }
 
@@ -26,12 +28,14 @@ class ProductController extends Controller
         ]);
 
         $user = Auth::user();
-        $store = Shop::find($request->toko_id);
+        $shop = Shop::find($request->shop_id);
 
-        if ($store->user_id != $user->id) {
+        if ($shop->user_id != $user->id) {
             return ResponseHelper::error(['error' => 'Unauthorized action.'], 403);
         }
-        $imagePath = $request->file('image')->store('products', 'public');
+        // $imagePath = $request->file('img')->store('storage/products', 'public');
+        $fileName = explode('.', $request->file('img')->getClientOriginalName())[0];
+        $imagePath = Storage::disk('public')->put($fileName, $request->file('img'));
 
         $product = new Product([
             'img' => $imagePath,
@@ -41,7 +45,7 @@ class ProductController extends Controller
             'harga' => $request->harga,
             'jumlahBarang' => $request->jumlahBarang,
             'user_id' => $user->id,
-            'toko_id' => $store->id,
+            'shop_id' => $shop->id,
         ]);
 
         $product->save();
@@ -65,23 +69,39 @@ class ProductController extends Controller
         ]);
 
         $user = Auth::user();
-        $product = $user->products()->findOrFail($id);
+        $product = Product::findOrFail($id);
 
-        $store = Shop::find($request->toko_id);
+        $shop = Shop::find($request->shop_id);
 
-        if ($store->user_id != $user->id) {
+        if ($shop->user_id != $user->id) {
             return ResponseHelper::error(['error' => 'Unauthorized action.'], 403);
         }
+        if ($request->file('img') !== null){
+            Storage::delete($product->img);
+            $fileName = explode('.', $request->file('img')->getClientOriginalName())[0];
+            $imagePath = Storage::disk('public')->put($fileName, $request->file('img'));
+            $product->update([
+                'namaBarang' => $request->namaBarang,
+                'asal' => $request->asal,
+                'rating' => $request->rating,
+                'harga' => $request->harga,
+                'jumlahBarang' => $request->jumlahBarang,
+                'img' => $imagePath,
+            ]);
+        } else {
+            $product->update([
+                'namaBarang' => $request->namaBarang,
+                'asal' => $request->asal,
+                'rating' => $request->rating,
+                'harga' => $request->harga,
+                'jumlahBarang' => $request->jumlahBarang,
+            ]);
 
-        $product->update([
-            'namaBarang' => $request->namaBarang,
-            'asal' => $request->asal,
-            'rating' => $request->rating,
-            'harga' => $request->harga,
-            'jumlahBarang' => $request->jumlahBarang,
-        ]);
+        }
 
-        return ResponseHelper::success($product, 200);
+        $productUpdate = Product::findOrFail($id);
+
+        return ResponseHelper::success($productUpdate, 200);
     }
 
     public function destroy($id) {

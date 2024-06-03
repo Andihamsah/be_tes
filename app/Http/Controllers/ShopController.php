@@ -34,16 +34,16 @@ class ShopController extends Controller
     public function store(Request $request) {
         $user = Auth::user();
 
-        $store = Shop::create([
+        $shop = Shop::create([
             'namaToko' => $user->name,
             'user_id' => $user->id,
         ]);
         $role = Role::where(['guard_name' => 'web', 'name' => 'admin'])->get();
 
-        $user->assignRole($role);
+        $user->syncRoles($role);
         $user->save();
 
-        return ResponseHelper::success(['store' => $store], 'Toko Berhasil Dibuat', 201);
+        return ResponseHelper::success($shop, 'Toko Berhasil Dibuat', 201);
     }
 
     /**
@@ -68,20 +68,20 @@ class ShopController extends Controller
     public function update(Request $request, shop $shop)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'namaToko' => 'required|string|max:255',
         ]);
 
         $user = Auth::user();
         $shop = $user->shop;
 
         if (!$shop) {
-            return response()->json(['message' => 'Shop not found'], 404);
+            return ResponseHelper::error(['message' => 'Shop not found'], 404);
         }
 
-        $shop->namaToko = $request->name;
+        $shop->namaToko = $request->namaToko;
         $shop->save();
 
-        return response()->json(['message' => 'Shop name updated successfully', 'shop' => $shop]);
+        return ResponseHelper::success($shop, 'Shop name updated successfully', 200);
     }
 
     /**
@@ -89,6 +89,23 @@ class ShopController extends Controller
      */
     public function destroy(shop $shop)
     {
-        //
+        $user = Auth::user();
+        $shop = $user->shop;
+
+        if (!$shop) {
+            return ResponseHelper::error(['message' => 'Shop not found'], 404);
+        }
+
+        // Hapus semua produk terkait
+        
+        $shop->products()->delete();
+
+        // Hapus toko
+        $shop->delete();
+        $role = Role::where(['guard_name' => 'web', 'name' => 'buyer'])->get();
+
+        $user->syncRoles($role);
+        $user->save();
+        return ResponseHelper::success([], 'Shop and related products deleted successfully', 200);
     }
 }

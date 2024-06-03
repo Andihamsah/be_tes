@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuyController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
@@ -26,13 +27,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::middleware('auth:api', 'web')->group(function () {  
+Route::middleware('auth:api')->group(function () {  
     Route::get('/shop', [ShopController::class, 'index']);
     Route::post('/create-shop', [ShopController::class, 'store']);
-    Route::post('/update-shop', [ProductController::class, 'update']);
+    Route::put('/update-shop', [ShopController::class, 'update']);
+    Route::delete('/delete-shop', [ShopController::class, 'destroy']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);    // Route::apiResource('posts.comments', CommentController::class);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::get('/pembelian', [BuyController::class, 'index']);
+    Route::post('/pembelian', [BuyController::class, 'store']);
+    Route::get('/pembelian/{id}', [BuyController::class, 'show']);
+    Route::put('/pembelian/{id}', [BuyController::class, 'update']);
+    Route::delete('/pembelian/{id}', [BuyController::class, 'destroy']);
 });
